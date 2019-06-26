@@ -1,0 +1,2 @@
+hasK8sHeadless: false
+hasCoredns: true

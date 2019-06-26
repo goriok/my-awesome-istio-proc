@@ -1,0 +1,21 @@
+{{- if .Values.hasK8sHeadless }}
+apiVersion: v1 
+kind: Service
+metadata: 
+  name: correios-svc
+spec: 
+  ports: 
+  - protocol: TCP 
+    port: 80 
+    targetPort: 80
+---
+apiVersion: v1 
+kind: Endpoints 
+metadata: 
+  name: correios-svc
+subsets: 
+- addresses: 
+  - ip: 52.0.57.170
+  ports: 
+  - port: 80
+{{- end }}

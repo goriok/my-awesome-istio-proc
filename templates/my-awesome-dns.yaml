@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-awesome-dns
+  namespace: kube-system
+spec:
+  selector:
+    app: dns
+  ports:
+  - protocol: UDP
+    port: 53
+    name: udp-1
+  - protocol: TCP
+    port: 8080
+    name: tcp-2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-awesome-dns
+  namespace: kube-system
+  labels:
+    app: dns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dns
+  template:
+    metadata:
+      labels:
+        app: dns
+    spec:
+      containers:
+      - name: my-awesome-dns
+        image: jpillora/dnsmasq:latest
+        ports:
+        - containerPort: 53
+          protocol: UDP
+          name: udp-dnsmasq
+        - containerPort: 8080
+          protocol: TCP
+          name: http-admin
+        env:
+        - name: HTTP_USER
+          value: admin
+        - name: HTTP_PASS
+          value: password
+        volumeMounts:
+        - name: dnsmasq-config
+          mountPath: /etc/dnsmasq.conf
+          subPath: dnsmasq.conf
+      volumes: 
+      - name: dnsmasq-config
+        configMap:
+          name: my-awesome-dns
+          items:
+          - key: dnsmasq.conf
+            path: dnsmasq.conf
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kube-dns
+  namespace: kube-system
+data:
+  stubDomains: |
+    {"my-awesome.k8s": ["my-awesome-dns.default.svc.cluster.local"]}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-awesome-dns
+  namespace: kube-system
+data:
+  dnsmasq.conf: |
+    log-queries
+    no-resolv
+    address=/httpbin.my-awesome.k8s/34.230.136.58

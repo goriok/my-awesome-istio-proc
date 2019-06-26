@@ -1,0 +1,55 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: external-svc-correios-http
+spec:
+  hosts: 
+  - httpbin.my-awesome.k8s
+  location: MESH_EXTERNAL
+  ports:
+  - number: 80
+    name: http
+    protocol: HTTP
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: correios-vs
+spec:
+  hosts:
+  - httpbin.my-awesome.k8s
+  http:
+  - retries:
+      attempts: 4
+    route:
+    - destination:
+        host: httpbin.my-awesome.k8s
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: httpbin-vs
+spec:
+  hosts:
+  - httpbin 
+  http:
+  - retries:
+      attempts: 4
+    route:
+    - destination:
+        host: httpbin
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: correios-svc
+spec:
+  host: httpbin.my-awesome.k8s
+  trafficPolicy:
+    connectionPool:
+      http:
+        http1MaxPendingRequests: 1
+        maxRetries: 1
+      tcp:
+        maxConnections: 1
