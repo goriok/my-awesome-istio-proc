@@ -76,4 +76,5 @@ data:
   dnsmasq.conf: |
     log-queries
     no-resolv
-    address=/httpbin.my-awesome.k8s/34.230.136.58
+    address=/jiraiya.default.svc.cluster.local/34.230.136.58
+    address=/jiraiya.tests.svc.cluster.local/172.217.172.132

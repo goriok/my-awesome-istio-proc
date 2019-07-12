@@ -11,7 +11,7 @@ data:
         health
         kubernetes cluster.local in-addr.arpa ip6.arpa {
            pods insecure
-           upstream
+           upstream 
            fallthrough in-addr.arpa ip6.arpa
         }
         prometheus :9153
@@ -21,9 +21,7 @@ data:
         reload
         loadbalance
     }
-    httpbin.my-awesome.k8s:53 {
-      errors
-      cache 30
-      forward . 10.106.34.249 
+    cluster.local {
+      forward . 10.106.34.249
     }
 {{- end }}
